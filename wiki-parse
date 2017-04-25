@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+import urllib
+import urllib2
+import json
+
+# Switch encoding so we can parse the JSON response from Wikipedia
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+# Default API URL
+apiurl = "https://en.wikipedia.org/w/api.php"
+
+# Default protocol for the images (can be http or https)
+imgprotocol = "http"
+
+# Parse arguments.
+parser = argparse.ArgumentParser(description='Parses Wiki Markup into HTML.')
+parser.add_argument('--file',                                                 type=str, help='File to parse.')
+parser.add_argument('--output',                                               type=str, help='Location to output HTML.')
+parser.add_argument('--apiurl',      nargs='?', const=1, default=apiurl,      type=str, help='URL of the MediaWiki API.')
+parser.add_argument('--imgprotocol', nargs='?', const=1, default=imgprotocol, type=str, help='Protocol of the image links (http or https).')
+args = parser.parse_args()
+
+# Validate arguments
+args_ok = True
+if (args.file) is None:
+    print >> sys.stderr, "Please supply a --file argument."
+    args_ok = False
+if (args.output) is None:
+    print >> sys.stderr, "Please supply an --output argument."
+    args_ok = False
+if (args.imgprotocol) != "http" and (args.imgprotocol) != "https":
+    print >> sys.stderr, "--imgprotocol must be one of http or https."
+    args_ok = False
+if not args_ok:
+    exit(1)
+
+# Check the input file exists
+if not os.path.exists(args.file):
+    print >> sys.stderr, "File " + args.file + " does not exist."
+    exit(1)
+
+# Read the file in
+with open(args.file, "r") as input_file:
+    wiki_markup = input_file.read()
+    input_file.close()
+
+# Build request payload
+payload = { 'action' : 'parse', 'format' : 'json', 'text' : wiki_markup, 'contentmodel' : 'wikitext' }
+
+# Send the request to the API
+request = apiurl + '?' + urllib.urlencode(payload)
+response = urllib2.urlopen(request, timeout=5)
+response_payload = response.read()
+
+# Store the response body as a dictionary object.
+response_payload_dict = json.loads(response_payload)
+
+# Write file
+with open(args.output, "w") as output_file:
+    output_file.write(response_payload_dict['parse']['text'][str('*')].replace("//", args.imgprotocol + "://"))
+    output_file.close()
+
+exit(0)
