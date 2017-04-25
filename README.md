@@ -30,4 +30,4 @@ Dynamic content: false
 
 Use `-h` to view the various options at the command line.
 
-By default, the script uses the main Wikipedia API at `https://en.wikipedia.org/w/api.php`, but this can be changed by supplying an alternate API URL with the `--apiurl` switch. (other APIs are listed [here](https://www.mediawiki.org/wiki/API:Main_page).
+By default, the script uses the main Wikipedia API at `https://en.wikipedia.org/w/api.php`, but this can be changed by supplying an alternate API URL with the `--apiurl` switch. (other APIs are listed [here](https://www.mediawiki.org/wiki/API:Main_page)).
